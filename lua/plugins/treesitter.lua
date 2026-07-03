@@ -17,6 +17,7 @@ ts_configs.setup({
 		"c_sharp",
 		"razor",
 		"html",
+		"css",
 	},
 
 	highlight = { enable = true },

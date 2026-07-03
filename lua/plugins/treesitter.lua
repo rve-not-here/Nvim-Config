@@ -15,6 +15,7 @@ ts_configs.setup({
 		"bash",
 		"regex",
 		"c_sharp",
+		"razor",
 		"html",
 	},
 

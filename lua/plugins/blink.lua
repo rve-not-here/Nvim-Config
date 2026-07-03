@@ -14,6 +14,25 @@ return function()
       per_filetype = {
         cs = { "lsp", "snippets", "buffer", "path" },
       },
+      providers = {
+        lsp = {
+          transform_items = function(_, items)
+            for _, item in ipairs(items) do
+              local text = item.textEdit and item.textEdit.newText or item.insertText
+              if text
+                and not text:match("%(")
+                and (item.kind == vim.lsp.protocol.CompletionItemKind.Method
+                  or item.kind == vim.lsp.protocol.CompletionItemKind.Function)
+              then
+                if item.textEdit then
+                  item.textEdit.newText = text .. "()"
+                end
+              end
+            end
+            return items
+          end,
+        },
+      },
     },
     fuzzy = {
       implementation = "lua",
@@ -57,7 +76,7 @@ return function()
     keymap = {
       preset = "default",
       ["<CR>"] = { "accept", "fallback" },
-      ["<C-Space>"] = { "show", "fallback" },
+      ["<C-Space>"] = { "show", "show_documentation", "hide_documentation", "fallback" },
       ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
       ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
     },

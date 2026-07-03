@@ -93,8 +93,9 @@ vim.api.nvim_create_user_command("RoslynDebug", function()
   local client_caps = client.config and client.config.capabilities
   local snippet_advertised = vim.tbl_get(client_caps, "textDocument", "completion", "completionItem", "snippetSupport")
   local server_caps = client.server_capabilities
-  vim.notify("Client advertises snippetSupport: " .. vim.inspect(snippet_advertised), vim.log.levels.INFO)
+  vim.notify("Client snippetSupport: " .. vim.inspect(snippet_advertised), vim.log.levels.INFO)
   vim.notify("Server completionProvider: " .. vim.inspect(server_caps.completionProvider), vim.log.levels.INFO)
+  vim.notify("Clients: " .. vim.inspect(vim.tbl_map(function(c) return c.name end, vim.lsp.get_clients({ bufnr = 0 }))), vim.log.levels.INFO)
 end, { desc = "Debug roslyn LSP capabilities" })
 
 vim.keymap.set("n", "<leader>Dr", function()

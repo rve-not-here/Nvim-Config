@@ -7,7 +7,8 @@ conform.setup({
 	formatters_by_ft = {
 		cs = { "csharpier" },
 		lua = { "stylua" },
-		-- razor removed — csharpier can't handle it, see below
+		razor = { "csharpier" },
+		html = { "prettier" },
 	},
 	formatters = {
 		csharpier = {

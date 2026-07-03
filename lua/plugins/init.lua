@@ -9,6 +9,7 @@ local function safe(req)
 	end
 end
 
+safe("plugins.snippets")
 safe("plugins.blink")
 safe("plugins.colorscheme")
 safe("plugins.dap")
@@ -23,6 +24,5 @@ safe("plugins.treesitter")
 safe("plugins.notify")
 safe("plugins.mini_surround")
 safe("plugins.indent_blankline")
-safe("plugins.snippets")
 safe("plugins.autopairs")
 safe("plugins.tiny-inline-diagnostic")

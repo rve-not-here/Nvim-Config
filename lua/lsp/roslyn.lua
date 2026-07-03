@@ -55,6 +55,7 @@ vim.lsp.config("roslyn_ls", {
     ["csharp|completion"] = {
       dotnet_trigger_completion_in_argument_lists = true,
       dotnet_show_completion_items_from_unimported_namespaces = true,
+      dotnet_show_completion_items_from_snippets = true,
     },
   },
 })

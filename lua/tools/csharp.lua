@@ -1,0 +1,91 @@
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup
+
+autocmd("BufNewFile", {
+	group = augroup("csharp_template", { clear = true }),
+	pattern = "*.cs",
+	callback = function()
+		local root = vim.fs.root(0, function(name)
+			return name:match("%.csproj$") or name:match("%.sln$")
+		end)
+		if not root then
+			return
+		end
+
+		local csproj = vim.fn.glob(root .. "/*.csproj")
+		local proj = vim.fn.fnamemodify(csproj, ":t:r")
+		local rel = vim.fn.expand("%:p:h"):gsub(root .. "/", ""):gsub("/", ".")
+		local ns = proj .. (rel ~= "" and "." .. rel or "")
+		local cls = vim.fn.expand("%:t:r")
+
+		vim.api.nvim_buf_set_lines(0, 0, 0, false, {
+			"namespace " .. ns .. ";",
+			"",
+			"public class " .. cls,
+			"{",
+			"    ",
+			"}",
+		})
+		vim.api.nvim_win_set_cursor(0, { 5, 4 })
+	end,
+})
+
+-- dotnet helpers
+local function find_project_root()
+	return vim.fs.root(0, function(name)
+		return name:match("%.csproj$")
+	end) or vim.fn.getcwd()
+end
+
+-- Terminal: for run (interactive output)
+local function dotnet_cmd(cmd)
+	local dir = find_project_root()
+	vim.fn.chdir(dir)
+	vim.cmd("belowright split | terminal dotnet " .. cmd)
+	vim.cmd("resize 15")
+	vim.cmd("startinsert")
+end
+local function dotnet_bg(cmd)
+	local dir = find_project_root()
+	local output = {}
+
+	vim.fn.jobstart({ "dotnet", cmd }, {
+		cwd = dir,
+		stdout_buffered = true,
+		stderr_buffered = true,
+		on_stdout = function(_, data)
+			if data then
+				vim.list_extend(output, data)
+			end
+		end,
+		on_stderr = function(_, data)
+			if data then
+				vim.list_extend(output, data)
+			end
+		end,
+		on_exit = function(_, code)
+			if code == 0 then
+				vim.notify("dotnet " .. cmd .. " succeeded", vim.log.levels.INFO)
+			else
+				-- Show the actual build errors
+				local errors = {}
+				for _, line in ipairs(output) do
+					if line:match("error CS") then
+						table.insert(errors, line)
+					end
+				end
+				if #errors > 0 then
+					vim.notify(table.concat(errors, "\n"), vim.log.levels.ERROR, { title = "Build errors" })
+				else
+					vim.notify("dotnet " .. cmd .. " failed\n" .. table.concat(output, "\n"), vim.log.levels.ERROR)
+				end
+			end
+		end,
+	})
+end
+vim.keymap.set("n", "<leader>Dr", function()
+	dotnet_cmd("run")
+end, { desc = "Dotnet run" })
+vim.keymap.set("n", "<leader>Db", function()
+	dotnet_bg("build")
+end, { desc = "Dotnet build" })

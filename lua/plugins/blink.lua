@@ -1,0 +1,90 @@
+return function()
+  local ok, blink = pcall(require, "blink.cmp")
+  if not ok then
+    vim.notify("blink.cmp not found", vim.log.levels.ERROR)
+    return
+  end
+
+  blink.setup({
+    snippets = {
+      preset = "luasnip",
+    },
+    sources = {
+      default = { "lsp", "path", "snippets", "buffer" },
+      per_filetype = {
+        cs = { "lsp", "snippets", "buffer", "path" },
+      },
+    },
+    fuzzy = {
+      implementation = "lua",
+    },
+    completion = {
+      trigger = {
+        show_on_keyword = true,
+        show_on_trigger_character = true,
+      },
+      list = {
+        selection = {
+          preselect = true,
+          auto_insert = false,
+        },
+      },
+      documentation = {
+        auto_show = true,
+        window = {
+          border = "single",
+          winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder",
+        },
+      },
+      menu = {
+        border = "single",
+        winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection",
+        -- Removed: format field is not valid in this version
+      },
+    },
+    signature = {
+      enabled = true,
+      window = {
+        border = "single",
+        winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder",
+      },
+    },
+    keymap = {
+      preset = "default",
+      ["<CR>"] = { "accept", "fallback" },
+      ["<C-Space>"] = { "show", "fallback" },
+      ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+      ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+    },
+    appearance = {
+      nerd_font_variant = "normal",
+      kind_icons = {
+        Text = "󰉿",
+        Method = "󰆧",
+        Function = "󰊕",
+        Constructor = "",
+        Field = "󰜢",
+        Variable = "󰀫",
+        Class = "󰠱",
+        Interface = "",
+        Module = "",
+        Property = "󰜢",
+        Unit = "󰑭",
+        Value = "󰎠",
+        Enum = "",
+        Keyword = "󰌋",
+        Snippet = "",
+        Color = "󰏘",
+        File = "󰈙",
+        Reference = "󰈇",
+        Folder = "󰉋",
+        EnumMember = "",
+        Constant = "󰏿",
+        Struct = "󰙅",
+        Event = "",
+        Operator = "󰆕",
+        TypeParameter = "󰉺",
+      },
+    },
+  })
+end

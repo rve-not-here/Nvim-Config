@@ -83,9 +83,19 @@ local function dotnet_bg(cmd)
 		end,
 	})
 end
+vim.api.nvim_create_user_command("RoslynDebug", function()
+  local clients = vim.lsp.get_clients({ name = "roslyn_ls" })
+  if #clients == 0 then
+    vim.notify("roslyn_ls not attached", vim.log.levels.WARN)
+    return
+  end
+  local caps = clients[1].server_capabilities
+  vim.notify("roslyn_ls attached. completionProvider: " .. vim.inspect(caps.completionProvider and caps.completionProvider.triggerCharacters), vim.log.levels.INFO)
+end, { desc = "Debug roslyn LSP status" })
+
 vim.keymap.set("n", "<leader>Dr", function()
-	dotnet_cmd("run")
+  dotnet_cmd("run")
 end, { desc = "Dotnet run" })
 vim.keymap.set("n", "<leader>Db", function()
-	dotnet_bg("build")
+  dotnet_bg("build")
 end, { desc = "Dotnet build" })

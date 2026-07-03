@@ -19,6 +19,11 @@ return function()
       implementation = "lua",
     },
     completion = {
+      accept = {
+        auto_brackets = {
+          enabled = true,
+        },
+      },
       trigger = {
         show_on_keyword = true,
         show_on_trigger_character = true,

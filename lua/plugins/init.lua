@@ -9,6 +9,7 @@ local function safe(req)
 	end
 end
 
+safe("plugins.blink")
 safe("plugins.colorscheme")
 safe("plugins.dap")
 safe("plugins.clue")

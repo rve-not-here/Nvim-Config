@@ -89,9 +89,13 @@ vim.api.nvim_create_user_command("RoslynDebug", function()
     vim.notify("roslyn_ls not attached", vim.log.levels.WARN)
     return
   end
-  local caps = clients[1].server_capabilities
-  vim.notify("roslyn_ls attached. completionProvider: " .. vim.inspect(caps.completionProvider and caps.completionProvider.triggerCharacters), vim.log.levels.INFO)
-end, { desc = "Debug roslyn LSP status" })
+  local client = clients[1]
+  local client_caps = client.config and client.config.capabilities
+  local snippet_advertised = vim.tbl_get(client_caps, "textDocument", "completion", "completionItem", "snippetSupport")
+  local server_caps = client.server_capabilities
+  vim.notify("Client advertises snippetSupport: " .. vim.inspect(snippet_advertised), vim.log.levels.INFO)
+  vim.notify("Server completionProvider: " .. vim.inspect(server_caps.completionProvider), vim.log.levels.INFO)
+end, { desc = "Debug roslyn LSP capabilities" })
 
 vim.keymap.set("n", "<leader>Dr", function()
   dotnet_cmd("run")

@@ -14,7 +14,7 @@ autocmd("BufNewFile", {
 
 		local csproj = vim.fn.glob(root .. "/*.csproj")
 		local proj = vim.fn.fnamemodify(csproj, ":t:r")
-		local rel = vim.fn.expand("%:p:h"):gsub(root .. "/", ""):gsub("/", ".")
+		local rel = vim.fn.expand("%:p:h"):gsub(vim.pesc(root) .. "/", ""):gsub("/", ".")
 		local ns = proj .. (rel ~= "" and "." .. rel or "")
 		local cls = vim.fn.expand("%:t:r")
 
@@ -108,3 +108,26 @@ end, { desc = "Dotnet run" })
 vim.keymap.set("n", "<leader>Db", function()
   dotnet_bg("build")
 end, { desc = "Dotnet build" })
+
+-- ═══════════════════════════════════════════════════════════════
+-- NEW DOTNET COMMANDS:
+-- ═══════════════════════════════════════════════════════════════
+
+-- Run .NET tests
+vim.keymap.set("n", "<leader>Dt", function()
+	vim.cmd("split | terminal dotnet test")
+end, { desc = "Run .NET tests" })
+
+-- Watch .NET tests
+vim.keymap.set("n", "<leader>Dw", function()
+	vim.cmd("split | terminal dotnet watch test")
+end, { desc = "Watch .NET tests" })
+
+-- Add NuGet package
+vim.keymap.set("n", "<leader>Dn", function()
+	local package = vim.fn.input("Package: ")
+	if package ~= "" then
+		vim.fn.system("dotnet add package " .. package)
+		vim.notify("Added " .. package, vim.log.levels.INFO)
+	end
+end, { desc = "Add NuGet package" })

@@ -56,6 +56,10 @@ clue.setup({
 		{ mode = "n", keys = "<leader>gc", desc = "Commit" },
 		{ mode = "n", keys = "<leader>gw", desc = "Stage file" },
 		{ mode = "n", keys = "<leader>gt", desc = "Git status (Telescope)" },
+		{ mode = "n", keys = "<leader>gv", desc = "Diffview open" },
+		{ mode = "n", keys = "<leader>gV", desc = "Diffview close" },
+		{ mode = "n", keys = "<leader>gh", desc = "Repo history" },
+		{ mode = "n", keys = "<leader>gH", desc = "File history" },
 
 		--------------------------------------------------------
 		-- Buffers
@@ -117,6 +121,7 @@ clue.setup({
 		--------------------------------------------------------
 		{ mode = "n", keys = "]t", desc = "Next TODO" },
 		{ mode = "n", keys = "[t", desc = "Previous TODO" },
+		{ mode = "n", keys = "<leader>Ft", desc = "Find todos (Telescope)" },
 
 		--------------------------------------------------------
 		-- DAP (Debugger)
@@ -124,29 +129,56 @@ clue.setup({
 		{ mode = "n", keys = "<leader>d", desc = "+Debug" },
 		{ mode = "n", keys = "<leader>db", desc = "Toggle breakpoint" },
 		{ mode = "n", keys = "<leader>dB", desc = "Conditional breakpoint" },
-		{ mode = "n", keys = "<leader>dc", desc = "Continue" },
+		{ mode = "n", keys = "<leader>dc", desc = "Start / Continue" },
 		{ mode = "n", keys = "<leader>do", desc = "Step over" },
 		{ mode = "n", keys = "<leader>di", desc = "Step into" },
 		{ mode = "n", keys = "<leader>dO", desc = "Step out" },
-		{ mode = "n", keys = "<leader>dt", desc = "Terminate" },
+		{ mode = "n", keys = "<leader>dt", desc = "Stop debugging" },
 		{ mode = "n", keys = "<leader>dr", desc = "Open REPL" },
 		{ mode = "n", keys = "<leader>dl", desc = "Run last" },
 		{ mode = "n", keys = "<leader>du", desc = "Toggle DAP UI" },
-		{ mode = "n", keys = "<leader>dT", desc = "Diff tool" },
 
 		--------------------------------------------------------
 		-- Plugins
 		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>p", desc = "+Plugins" },
 		{ mode = "n", keys = "<leader>pc", desc = "Clean plugins" },
 		{ mode = "n", keys = "<leader>pu", desc = "Update plugins" },
 
 		--------------------------------------------------------
+		-- Notifications
+		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>n", desc = "+Notifications" },
+		{ mode = "n", keys = "<leader>nn", desc = "Dismiss all notifications" },
+		{ mode = "n", keys = "<leader>nh", desc = "Dismiss all notifications" },
+		{ mode = "n", keys = "<leader>nl", desc = "Notification history" },
 
 		--------------------------------------------------------
-		{ mode = "n", keys = "<leader>u", desc = "Undo tree" },
+		-- Misc
+		--------------------------------------------------------
 		{ mode = "n", keys = "<leader>cc", desc = "Find config files" },
-		{ mode = "n", keys = "<leader>nn", desc = "Dismiss notifications" },
-		{ mode = "n", keys = "<leader>-", desc = "File explorer" },
+		{ mode = "n", keys = "<leader>-", desc = "File explorer (Oil)" },
+		{ mode = "n", keys = "<Esc>", desc = "Clear search highlight" },
+		{ mode = "x", keys = "<leader>p", desc = "Paste without yank" },
+		{ mode = "n", keys = "<leader>Dv", desc = "Delete to void" },
+		{ mode = "v", keys = "<leader>Dv", desc = "Delete selection to void" },
+		{ mode = "t", keys = "<Esc><Esc>", desc = "Exit terminal mode" },
+
+		--------------------------------------------------------
+		-- Navigation
+		--------------------------------------------------------
+		{ mode = "n", keys = "n", desc = "Next search (centered)" },
+		{ mode = "n", keys = "N", desc = "Prev search (centered)" },
+		{ mode = "n", keys = "<C-d>", desc = "Scroll down (centered)" },
+		{ mode = "n", keys = "<C-u>", desc = "Scroll up (centered)" },
+		{ mode = "n", keys = "<C-h>", desc = "Move left window" },
+		{ mode = "n", keys = "<C-j>", desc = "Move down window" },
+		{ mode = "n", keys = "<C-k>", desc = "Move up window" },
+		{ mode = "n", keys = "<C-l>", desc = "Move right window" },
+		{ mode = "n", keys = "j", desc = "Move down (to first non-blank)" },
+		{ mode = "v", keys = "j", desc = "Move down (to first non-blank)" },
+		{ mode = "n", keys = "k", desc = "Move up (to first non-blank)" },
+		{ mode = "v", keys = "k", desc = "Move up (to first non-blank)" },
 
 		--------------------------------------------------------
 		-- Window navigation
@@ -157,15 +189,54 @@ clue.setup({
 		{ mode = "n", keys = "<C-w>l", desc = "Right window" },
 
 		--------------------------------------------------------
+		-- Insert mode undo breakpoints
+		--------------------------------------------------------
+		{ mode = "i", keys = ",", desc = "Undo break on comma" },
+		{ mode = "i", keys = ".", desc = "Undo break on period" },
+		{ mode = "i", keys = "!", desc = "Undo break on exclamation" },
+		{ mode = "i", keys = "?", desc = "Undo break on question mark" },
+
+		--------------------------------------------------------
 		-- Dotnet
 		--------------------------------------------------------
 		{ mode = "n", keys = "<leader>D", desc = "+Dotnet" },
 		{ mode = "n", keys = "<leader>Dr", desc = "Dotnet run" },
 		{ mode = "n", keys = "<leader>Db", desc = "Dotnet build" },
+		{ mode = "n", keys = "<leader>Dt", desc = "Run .NET tests" },
+		{ mode = "n", keys = "<leader>Dw", desc = "Watch .NET tests" },
+		{ mode = "n", keys = "<leader>Dn", desc = "Add NuGet package" },
+
+		--------------------------------------------------------
+		-- Trouble
+		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>x", desc = "+Trouble" },
+		{ mode = "n", keys = "<leader>xx", desc = "Diagnostics" },
+		{ mode = "n", keys = "<leader>xX", desc = "Buffer diagnostics" },
+		{ mode = "n", keys = "<leader>xl", desc = "Location list" },
+		{ mode = "n", keys = "<leader>xq", desc = "Quickfix list" },
+
+		--------------------------------------------------------
+		-- Aerial
+		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>o", desc = "Code outline (Aerial)" },
+
+		--------------------------------------------------------
+		-- Neotest
+		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>t", desc = "+Tests" },
+		{ mode = "n", keys = "<leader>tr", desc = "Run nearest test" },
+		{ mode = "n", keys = "<leader>tf", desc = "Run file tests" },
+		{ mode = "n", keys = "<leader>ts", desc = "Test summary" },
+		{ mode = "n", keys = "<leader>to", desc = "Test output" },
+
+		--------------------------------------------------------
+		-- Buffer creation
+		--------------------------------------------------------
+		{ mode = "n", keys = "<leader>bc", desc = "Create empty buffer" },
 	},
 
 	window = {
-		delay = 800,
+		delay = 400,
 		config = {
 			border = "rounded",
 			width = "auto",

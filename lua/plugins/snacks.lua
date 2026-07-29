@@ -1,18 +1,21 @@
-
 local ok, snacks = pcall(require, "snacks")
 if not ok then return end
 
+local banned_patterns = {
+  "No information available",
+  -- "roslyn_ls: .*", -- re-enable if roslyn gets noisy again
+}
+
+local last_msg, last_time = nil, 0
+
 require("snacks").setup({
-  -- ============================================================
-  -- Notifier: replacement for rcarriga/nvim-notify
-  -- ============================================================
   notifier = {
     enabled = true,
     timeout = 5000,
-    top_down = false, -- false = bottom-right, matches your old notify.lua
+    top_down = false,
     width = { min = 50, max = 80 },
     height = { min = 1, max = 20 },
-    style = "compact", -- "compact" | "fancy" | "minimal"
+    style = "minimal", -- "compact" | "fancy" | "minimal"
     icons = {
       error = "",
       warn = "",
@@ -20,63 +23,57 @@ require("snacks").setup({
       debug = "",
       trace = "󰌆",
     },
-    -- fancy-style border/background hooks, roughly equivalent to your
-    -- old on_open border override
     border = "single",
+    filter = function(notif)
+      for _, pattern in ipairs(banned_patterns) do
+        if (notif.msg and notif.msg:match(pattern))
+          or (notif.title and notif.title:match(pattern)) then
+          return false
+        end
+      end
+      -- dedup: drop if same msg fired <1s after the last one
+      local now = vim.loop.now()
+      if notif.msg == last_msg and (now - last_time) < 1000 then
+        return false
+      end
+      last_msg, last_time = notif.msg, now
+      return true
+    end,
   },
-
-  -- ============================================================
-  -- A few small, genuinely useful, low-risk modules to enable
-  -- alongside the notifier. Everything else stays off by default.
-  -- ============================================================
-
-  -- Faster startup on huge files (disables treesitter/LSP-heavy
-  -- features above a size threshold instead of hanging)
-  bigfile = { enabled = true },
-
-  -- Renders the buffer instantly on `nvim file.txt` before plugins
-  -- finish loading -- pure QoL, no conflicts with your setup
+  bigfile = {
+    enabled = true,
+    size = 1024 * 1024, -- 1MB, tighter than default 1.5MB, for Roslyn-generated .g.cs files
+    setup = function(ctx)
+      if vim.fn.exists(":NoMatchParen") ~= 0 then
+        vim.cmd("NoMatchParen")
+      end
+      vim.b.completion = false
+      vim.schedule(function()
+        if vim.api.nvim_buf_is_valid(ctx.buf) then
+          vim.bo[ctx.buf].syntax = ctx.ft
+        end
+      end)
+    end,
+  },
   quickfile = { enabled = true },
-
-  -- Pretty status column (line numbers, signs, folds) -- optional;
-  -- turn off if it fights with your heirline/mini.statusline setup
-  statuscolumn = { enabled = false },
-
-  -- Smooth scrolling -- purely cosmetic, safe to toggle off if you
-  -- don't like animated cursor movement
+  statuscolumn = { enabled = true },
+  input = { enabled = true },
+  indent = { -- ibl style
+    enabled = true,
+    scope = { enabled = false }, -- highlight scope / sakit sa mata
+    animate = { enabled = false },
+  },
   scroll = { enabled = false },
+  picker = {
+    enabled = true,
+    ui_select = true,
+  },
 })
 
--- ============================================================
--- Wire vim.notify to the snacks notifier
--- ============================================================
-local snacks_notify = require("snacks").notifier.notify
-
--- Keep your existing noise filter, just retarget it at snacks
-local banned_patterns = {
-  "No information available",
-  -- "roslyn_ls: .*", -- re-enable if roslyn gets noisy again
-}
-
-vim.notify = function(msg, level, opts)
-  opts = opts or {}
-  for _, pattern in ipairs(banned_patterns) do
-    if type(msg) == "string" and msg:match(pattern) then
-      return
-    end
-  end
-  snacks_notify(msg, level, opts)
-end
-
--- ============================================================
 -- Keymaps
--- ============================================================
 vim.keymap.set("n", "<leader>nh", function()
   require("snacks").notifier.hide()
 end, { desc = "Dismiss all notifications" })
-
 vim.keymap.set("n", "<leader>nl", function()
   require("snacks").notifier.show_history()
 end, { desc = "Notification history" })
-
-

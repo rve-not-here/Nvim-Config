@@ -149,7 +149,6 @@ clue.setup({
 		-- Notifications
 		--------------------------------------------------------
 		{ mode = "n", keys = "<leader>n", desc = "+Notifications" },
-		{ mode = "n", keys = "<leader>nn", desc = "Dismiss all notifications" },
 		{ mode = "n", keys = "<leader>nh", desc = "Dismiss all notifications" },
 		{ mode = "n", keys = "<leader>nl", desc = "Notification history" },
 

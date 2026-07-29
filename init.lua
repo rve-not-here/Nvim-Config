@@ -9,12 +9,8 @@ vim.filetype.add({
 
 vim.pack.add({
   "https://github.com/nvim-lua/plenary.nvim",
-  "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/lewis6991/gitsigns.nvim",
-  "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
-  "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/windwp/nvim-autopairs",
-  "https://github.com/lukas-reineke/indent-blankline.nvim",
   "https://github.com/echasnovski/mini.clue",
   "https://github.com/Saghen/blink.cmp",
   "https://github.com/Saghen/blink.lib",
@@ -22,9 +18,9 @@ vim.pack.add({
   "https://github.com/SmiteshP/nvim-navic",
   "https://github.com/echasnovski/mini.surround",
   "https://github.com/echasnovski/mini.ai",
+  "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/stevearc/oil.nvim",
   "https://github.com/stevearc/conform.nvim",
-  "https://github.com/nvim-telescope/telescope-ui-select.nvim",
   "https://github.com/folke/todo-comments.nvim",
   "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
   "https://github.com/tpope/vim-fugitive",

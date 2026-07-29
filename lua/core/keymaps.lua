@@ -65,19 +65,6 @@ map("n", "<leader>-", "<cmd>Oil<CR>", { desc = "Open file explorer" })
 
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
--- ── notify ──────────────────────────────────────────────────────────────────
-map("n", "<leader>nn", function()
-	require("notify").dismiss({ silent = true, pending = true })
-end, { desc = "Dismiss all notifications" })
-
--- ── config ────────────────────────────────────────────────────────────────────
-map("n", "<leader>cc", function()
-	require("telescope.builtin").find_files({
-		cwd = vim.fn.stdpath("config"),
-		prompt_title = "Neovim Config",
-	})
-end, { desc = "Find config files" })
-
 -- ── plugins ───────────────────────────────────────────────────────────────────
 local function pack_clean()
 	local unused = vim.iter(vim.pack.get())
@@ -121,27 +108,24 @@ map("n", "<leader>gp", "<cmd>Git push<cr>", { desc = "Git push" })
 map("n", "<leader>gP", "<cmd>Git pull<cr>", { desc = "Git pull" })
 map("n", "<leader>gc", "<cmd>Git commit<cr>", { desc = "Git commit" })
 map("n", "<leader>gw", "<cmd>Gwrite<cr>", { desc = "Git stage file" })
---
--- ── telescope ─────────────────────────────────────────────────────────────────
-local telescope_builtin = function(name)
-	return function()
-		local ok, telescope = pcall(require, "telescope.builtin")
-		if ok then
-			telescope[name]()
-		end
-	end
-end
 
-map("n", "<leader>ff", telescope_builtin("find_files"), { desc = "Find files" })
-map("n", "<leader>fg", telescope_builtin("live_grep"), { desc = "Live grep" })
-map("n", "<leader>fb", telescope_builtin("buffers"), { desc = "Find buffers" })
-map("n", "<leader>fh", telescope_builtin("help_tags"), { desc = "Help tags" })
-map("n", "<leader>fr", telescope_builtin("oldfiles"), { desc = "Recent files" })
-map("n", "<leader>fs", telescope_builtin("grep_string"), { desc = "Grep string under cursor" })
-map("n", "<leader>fd", telescope_builtin("diagnostics"), { desc = "Diagnostics" })
-map("n", "<leader>fc", telescope_builtin("commands"), { desc = "Commands" })
-map("n", "<leader>fk", telescope_builtin("keymaps"), { desc = "Keymaps" })
-map("n", "<leader>fz", telescope_builtin("current_buffer_fuzzy_find"), { desc = "Fuzzy find buffer" })
-map("n", "<leader>ft", telescope_builtin("treesitter"), { desc = "Treesitter symbols" })
-map("n", "<leader>fw", telescope_builtin("lsp_workspace_symbols"), { desc = "Workspace symbols" })
-map("n", "<leader>gt", telescope_builtin("git_status"), { desc = "Git status (Telescope)" })
+map("n", "<leader>cc", function()
+	require("snacks").picker.files({
+		cwd = vim.fn.stdpath("config"),
+	})
+end, { desc = "Find config files" })
+
+-- ── snacks picker ─────────────────────────────────────────────────────────────
+map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
+map("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Live grep" })
+map("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
+map("n", "<leader>fh", function() Snacks.picker.help() end, { desc = "Help tags" })
+map("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Recent files" })
+map("n", "<leader>fs", function() Snacks.picker.grep_word() end, { desc = "Grep string under cursor" })
+map("n", "<leader>fd", function() Snacks.picker.diagnostics() end, { desc = "Diagnostics" })
+map("n", "<leader>fc", function() Snacks.picker.commands() end, { desc = "Commands" })
+map("n", "<leader>fk", function() Snacks.picker.keymaps() end, { desc = "Keymaps" })
+map("n", "<leader>fz", function() Snacks.picker.lines() end, { desc = "Fuzzy find buffer" })
+map("n", "<leader>fw", function() Snacks.picker.lsp_workspace_symbols() end, { desc = "Workspace symbols" })
+map("n", "<leader>ft", function() Snacks.picker.lsp_symbols() end, { desc = "Document symbols" })
+map("n", "<leader>gt", function() Snacks.picker.git_status() end, { desc = "Git status (Snacks)" })

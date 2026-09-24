@@ -57,6 +57,7 @@ snacks.setup({
     end,
   },
   quickfile = { enabled = true },
+  profiler = { enabled = true }, -- :lua Snacks.profiler.pick() / startup analysis
   statuscolumn = { enabled = true },
   input = { enabled = true },
   words = {enabled = true},

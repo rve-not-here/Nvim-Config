@@ -49,6 +49,9 @@ vim.pack.add({
   "https://github.com/HakonHarnes/img-clip.nvim",
   "https://github.com/brianhuster/live-preview.nvim",
   "https://github.com/ramboe/ramboe-dotnet-utils",
+  -- undo tree (lua, lazy-loaded on toggle) + idle-LSP garbage collection
+  "https://github.com/jiaoshijie/undotree",
+  "https://github.com/zeioth/garbage-day.nvim",
 })
 
 require("core")

@@ -113,10 +113,10 @@ end, { desc = "Dotnet build" })
 -- NEW DOTNET COMMANDS:
 -- ═══════════════════════════════════════════════════════════════
 
--- Run .NET tests
-vim.keymap.set("n", "<leader>Dt", function()
+-- Run .NET tests (raw terminal)
+vim.keymap.set("n", "<leader>tF", function()
 	vim.cmd("split | terminal dotnet test")
-end, { desc = "Run .NET tests" })
+end, { desc = "Run all tests (dotnet test)" })
 
 -- Watch .NET tests
 vim.keymap.set("n", "<leader>Dw", function()

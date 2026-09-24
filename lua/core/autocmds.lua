@@ -18,19 +18,6 @@ autocmd("TextYankPost", {
   end,
 })
 
-autocmd("BufWritePre", {
-  group = augroup("trim_whitespace", { clear = true }),
-  pattern = "*",
-  callback = function()
-    if vim.bo.modifiable == false or vim.bo.binary then
-      return
-    end
-    local pos = vim.api.nvim_win_get_cursor(0)
-    vim.cmd([[%s/\s\+$//e]])
-    vim.api.nvim_win_set_cursor(0, pos)
-  end,
-})
-
 autocmd("BufReadPost", {
   group = augroup("restore_cursor", { clear = true }),
   callback = function()
@@ -64,7 +51,6 @@ autocmd("FileType", {
     "qf",
     "lspinfo",
     "checkhealth",
-    "notify",
     "fugitive",
     "git",
   },
@@ -79,20 +65,28 @@ autocmd("FileType", {
 })
 
 -- Disable features for large files (>500KB)
+-- Sets vim.b.large_file so treesitter/conform can skip (see those files).
 autocmd("BufReadPre", {
   group = augroup("large_file", { clear = true }),
-  callback = function()
+  callback = function(args)
     local max_filesize = 500 * 1024
-    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(0))
+    local name = args.match or vim.api.nvim_buf_get_name(args.buf)
+    if name == "" then
+      return
+    end
+    local ok, stats = pcall(vim.uv.fs_stat, name)
     if ok and stats and stats.size > max_filesize then
       vim.notify("Large file detected, disabling features", vim.log.levels.WARN)
+      vim.b[args.buf].large_file = 1
       vim.opt_local.spell = false
       vim.opt_local.swapfile = false
       vim.opt_local.undofile = false
       vim.opt_local.foldmethod = "manual"
-      vim.defer_fn(function()
-        vim.cmd("LspStop")
-      end, 100)
+      vim.opt_local.cursorline = false
+      vim.opt_local.list = false
+      vim.schedule(function()
+        pcall(vim.cmd, "LspStop")
+      end)
     end
   end,
 })
@@ -107,28 +101,28 @@ autocmd("FileType", {
     vim.opt_local.textwidth = 80
   end,
 })
--- C# organize imports on save
-autocmd("BufWritePre", {
+-- C# organize imports on save (async, BufWritePost)
+local last_organize = 0
+autocmd("BufWritePost", {
   group = augroup("csharp_organize_imports", { clear = true }),
   pattern = "*.cs",
-  callback = function()
-    local client = vim.lsp.get_clients({ bufnr = 0, name = "roslyn_ls" })[1]
+  callback = function(args)
+    local now = vim.uv.now()
+    if now - last_organize < 2000 then
+      return
+    end
+    last_organize = now
+    local client = vim.lsp.get_clients({ bufnr = args.buf, name = "roslyn_ls" })[1]
     if not client then
       return
     end
-    local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-    params.context = { only = { "source.organizeImports" } }
-    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
-    if not result or vim.tbl_isempty(result) then
-      return
-    end
-    for _, res in pairs(result) do
-      for _, action in pairs(res.result or {}) do
-        if action.edit then
-          vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-        end
-      end
-    end
+    vim.lsp.buf.code_action({
+      bufnr = args.buf,
+      filter = function(action)
+        return action.kind and action.kind:match("source%.organizeImports")
+      end,
+      apply = true,
+    })
   end,
 })
 -- .csproj files as XML
@@ -162,9 +156,10 @@ autocmd("FocusGained", {
   end,
 })
 
--- Cursorline in active window only
+-- Cursorline in active window only (single group so ReloadConfig can't duplicate)
+local cursorline_group = augroup("cursorline", { clear = true })
 autocmd({ "WinEnter", "BufEnter" }, {
-  group = augroup("cursorline", { clear = true }),
+  group = cursorline_group,
   callback = function()
     if vim.bo.buftype == "" then
       vim.opt_local.cursorline = true
@@ -173,21 +168,23 @@ autocmd({ "WinEnter", "BufEnter" }, {
 })
 
 autocmd({ "WinLeave", "BufLeave" }, {
-  group = augroup("cursorline", { clear = false }),
+  group = cursorline_group,
   callback = function()
     vim.opt_local.cursorline = false
   end,
 })
 
--- Auto-create missing directories on save
+-- Auto-create missing directories on save (silent; was notifying on every save)
 autocmd("BufWritePre", {
   group = augroup("auto_create_dir", { clear = true }),
   callback = function(event)
-    local file = vim.loop.fs_realpath(event.match) or event.match
+    local file = event.match
+    if file:match("^%a+://") or vim.bo[event.buf].buftype ~= "" then
+      return
+    end
     local dir = vim.fn.fnamemodify(file, ":h")
     if vim.fn.isdirectory(dir) == 0 then
       vim.fn.mkdir(dir, "p")
-      vim.notify("Created directory: " .. dir, vim.log.levels.INFO)
     end
   end,
 })
@@ -195,8 +192,8 @@ autocmd("BufWritePre", {
 -- Update file when changed externally
 autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime", { clear = true }),
-  callback = function()
-    if vim.o.buftype ~= "nofile" then
+  callback = function(event)
+    if vim.bo[event.buf].buftype ~= "nofile" then
       vim.cmd("checktime")
     end
   end,
@@ -214,19 +211,18 @@ autocmd("FileType", {
   end,
 })
 
--- Notify on appsettings.json changes
-autocmd("BufWritePost", {
-  group = augroup("dotnet_reload", { clear = true }),
-  pattern = "appsettings*.json",
+-- PHP settings (PSR-12: 4 spaces)
+autocmd("FileType", {
+  group = augroup("php_settings", { clear = true }),
+  pattern = "php",
   callback = function()
-    vim.notify("appsettings.json changed - restart app to apply", vim.log.levels.INFO)
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
   end,
 })
 
--- Limit syntax highlighting to 500 columns
-autocmd("BufEnter", {
-  group = augroup("syntax_limit", { clear = true }),
-  callback = function()
-    vim.opt_local.synmaxcol = 500
-  end,
-})
+
+
+-- Limit syntax highlighting to 500 columns (set once, no per-enter autocmd)
+vim.o.synmaxcol = 500

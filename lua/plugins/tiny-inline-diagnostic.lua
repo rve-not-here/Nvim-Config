@@ -3,33 +3,35 @@ if not ok then
   return
 end
 
+local p = require("ui.palette")
+
 ------------------------------------------------------------
 -- Highlight Groups
 ------------------------------------------------------------
 vim.api.nvim_set_hl(0, "TinyDiagError", {
-  fg = "#e06c75",
+  fg = p.red,
   bg = "NONE",
   bold = true,
 })
 
 vim.api.nvim_set_hl(0, "TinyDiagWarn", {
-  fg = "#e5c07b",
+  fg = p.yellow,
   bg = "NONE",
   bold = true,
 })
 
 vim.api.nvim_set_hl(0, "TinyDiagInfo", {
-  fg = "#61afef",
+  fg = p.blue,
   bg = "NONE",
 })
 
 vim.api.nvim_set_hl(0, "TinyDiagHint", {
-  fg = "#98c379",
+  fg = p.cyan,
   bg = "NONE",
 })
 
 vim.api.nvim_set_hl(0, "TinyDiagArrow", {
-  fg = "#5c6370",
+  fg = p.fg5,
   bold = true,
 })
 
@@ -38,16 +40,7 @@ vim.api.nvim_set_hl(0, "TinyDiagArrow", {
 ------------------------------------------------------------
 tiny.setup({
   preset = "modern",
-
   transparent_bg = true,
-  transparent_cursorline = true,
-
-  signs = {
-    diag = "",
-    arrow = "     ",
-    vertical = " │",
-    vertical_end = " └",
-  },
 
   hi = {
     error = "TinyDiagError",

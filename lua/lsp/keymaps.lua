@@ -16,11 +16,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- Actions
     map("<leader>rn", vim.lsp.buf.rename, "Rename")
     map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-    map("<leader>cf", vim.lsp.buf.format, "Format")
+    map("<leader>cf", function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Format")
 
-    -- Diagnostics
-    map("]d", vim.diagnostic.goto_next, "Next diagnostic")
-    map("[d", vim.diagnostic.goto_prev, "Previous diagnostic")
+    -- Diagnostics (goto_next/goto_prev are deprecated on 0.11+)
+    map("]d", function() vim.diagnostic.jump({ count = 1 }) end, "Next diagnostic")
+    map("[d", function() vim.diagnostic.jump({ count = -1 }) end, "Previous diagnostic")
     map("<leader>e", vim.diagnostic.open_float, "Diagnostic float")
 
     -- Inlay hints

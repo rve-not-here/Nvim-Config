@@ -1,20 +1,25 @@
-local p = require("ui.palette")
+local M = {}
 
+-- Applies every highlight from the current theme palette. Wrapped in a function
+-- so it can be re-run when `omarchy theme set` swaps the colors.toml live.
 local hl = function(group, opts)
 	vim.api.nvim_set_hl(0, group, opts)
 end
+
+local function apply(p)
 
 -- ── Base editor ──────────────────────────────────────────────────────────────
 hl("Normal", { fg = p.fg3, bg = p.bg0 })
 hl("NormalNC", { fg = p.fg4, bg = p.bg0 })
 
-hl("LineNr", { fg = p.fg5, bg = p.bg0 })
+hl("LineNr", { fg = p.mix(p.fg5, p.fg1, 0.25), bg = p.bg0 })
 hl("CursorLineNr", { fg = p.fg2, bg = p.bg1, bold = true })
 hl("CursorColumn", { bg = p.bg1 })
 hl("ColorColumn", { bg = p.bg1 })
 hl("SignColumn", { fg = p.fg5, bg = p.bg0 })
 
-hl("Visual", { bg = p.bg3 })
+-- visible warm selection band (text on it stays ~13:1)
+hl("Visual", { bg = p.mix(p.bg0, p.blue, 0.22) })
 hl("VisualNOS", { bg = p.bg2 })
 
 -- Search: Solarized convention uses bold for matches
@@ -45,7 +50,7 @@ hl("PmenuSbar", { bg = p.bg1 })
 hl("PmenuThumb", { bg = p.fg5 })
 hl("PmenuExtra", { fg = p.fg4, italic = true })
 
-hl("FloatBorder", { fg = p.bg3, bg = p.bg2 })
+hl("FloatBorder", { fg = p.mix(p.bg2, p.fg1, 0.25), bg = p.bg2 })
 hl("NormalFloat", { fg = p.fg3, bg = p.bg2 })
 hl("FloatTitle", { fg = p.blue, bg = p.bg2, bold = true })
 
@@ -62,7 +67,8 @@ hl("QuickFixLine", { bg = p.bg2 })
 hl("qfLineNr", { fg = p.fg5 })
 
 -- ── Syntax ────────────────────────────────────────────────────────────────────
-hl("Comment", { fg = p.fg5, italic = true })
+-- readable muted tone (~5:1 on bg0; raw fg5 is ~2.4:1, nearly invisible)
+hl("Comment", { fg = p.mix(p.fg5, p.fg1, 0.4), italic = true })
 
 -- Literals: Solarized emphasizes constants
 hl("Constant", { fg = p.cyan })
@@ -100,7 +106,7 @@ hl("Typedef", { fg = p.yellow })
 
 hl("Special", { fg = p.red })
 hl("Delimiter", { fg = p.fg4 })
-hl("SpecialComment", { fg = p.fg5, italic = true })
+hl("SpecialComment", { fg = p.mix(p.fg5, p.fg1, 0.4), italic = true })
 hl("Todo", { fg = p.magenta, bold = true })
 hl("Error", { fg = p.red, bold = true, underline = true })
 hl("Underlined", { underline = true })
@@ -159,7 +165,7 @@ hl("@punctuation.bracket", { fg = p.fg4 })
 hl("@punctuation.delimiter", { fg = p.fg4 })
 
 -- Comments
-hl("@comment", { fg = p.fg5, italic = true })
+hl("@comment", { fg = p.mix(p.fg5, p.fg1, 0.4), italic = true })
 hl("@comment.todo", { fg = p.magenta, bold = true })
 hl("@comment.warning", { fg = p.orange, bold = true })
 hl("@comment.error", { fg = p.red, bold = true })
@@ -181,11 +187,6 @@ hl("DiagnosticUnderlineError", { sp = p.red, undercurl = true })
 hl("DiagnosticUnderlineWarn", { sp = p.yellow, undercurl = true })
 hl("DiagnosticUnderlineInfo", { sp = p.blue, undercurl = true })
 hl("DiagnosticUnderlineHint", { sp = p.cyan, undercurl = true })
-
-hl("DiagnosticVirtualTextError", { fg = p.red, italic = true })
-hl("DiagnosticVirtualTextWarn", { fg = p.yellow, italic = true })
-hl("DiagnosticVirtualTextInfo", { fg = p.blue, italic = true })
-hl("DiagnosticVirtualTextHint", { fg = p.cyan, italic = true })
 
 hl("DiagnosticSignError", { fg = p.red })
 hl("DiagnosticSignWarn", { fg = p.yellow })
@@ -213,10 +214,11 @@ hl("@lsp.mod.readonly", { italic = true })
 hl("@lsp.mod.static", { italic = true })
 
 -- ── Diff / Git ────────────────────────────────────────────────────────────────
-hl("DiffAdd", { bg = "#0a2a0a" })
-hl("DiffChange", { bg = "#2a1a00" })
-hl("DiffDelete", { fg = p.red, bg = "#2a0000" })
-hl("DiffText", { bg = "#3e2a00", bold = true })
+-- theme-aware bands (were hardcoded solarized darks, invisible here)
+hl("DiffAdd", { bg = p.mix(p.bg0, p.green, 0.15) })
+hl("DiffChange", { bg = p.mix(p.bg0, p.yellow, 0.15) })
+hl("DiffDelete", { fg = p.red, bg = p.mix(p.bg0, p.red, 0.15) })
+hl("DiffText", { bg = p.mix(p.bg0, p.yellow, 0.3), bold = true })
 
 hl("diffAdded", { fg = p.green })
 hl("diffRemoved", { fg = p.red })
@@ -232,19 +234,6 @@ hl("GitSignsDelete", { fg = p.red })
 hl("GitSignsAddNr", { fg = p.green })
 hl("GitSignsChangeNr", { fg = p.yellow })
 hl("GitSignsDeleteNr", { fg = p.red })
-
--- ── Telescope ─────────────────────────────────────────────────────────────────
-hl("TelescopeNormal", { fg = p.fg3, bg = p.bg2 })
-hl("TelescopeBorder", { fg = p.bg3, bg = p.bg2 })
-hl("TelescopeTitle", { fg = p.blue, bold = true })
-hl("TelescopePromptNormal", { fg = p.fg1, bg = p.bg2 })
-hl("TelescopePromptBorder", { fg = p.blue, bg = p.bg2 })
-hl("TelescopePromptTitle", { fg = p.bg0, bg = p.blue, bold = true })
-hl("TelescopeResultsTitle", { fg = p.fg2, bg = p.bg2, bold = true })
-hl("TelescopePreviewTitle", { fg = p.bg0, bg = p.green, bold = true })
-hl("TelescopeSelection", { bg = p.bg3 })
-hl("TelescopeSelectionCaret", { fg = p.orange })
-hl("TelescopeMatching", { fg = p.magenta, bold = true })
 
 -- ── blink.cmp ─────────────────────────────────────────────────────────────────
 hl("BlinkCmpMenu", { fg = p.fg3, bg = p.bg2 })
@@ -286,6 +275,19 @@ hl("TodoFgFIX", { fg = p.red })
 hl("TodoFgHACK", { fg = p.orange })
 hl("TodoFgNOTE", { fg = p.cyan })
 
+-- ── Snacks dashboard (explicit roles so it always follows the system
+-- theme; snacks only sets these with default=true, ours win and re-apply
+-- on theme switch. Blue/orange roles track the lucent layer automatically.)
+hl("SnacksDashboardHeader", { fg = p.blue, bold = true })
+hl("SnacksDashboardIcon", { fg = p.cyan })
+hl("SnacksDashboardKey", { fg = p.blue, bold = true })
+hl("SnacksDashboardDesc", { fg = p.fg3 })
+hl("SnacksDashboardFooter", { fg = p.fg5 })
+hl("SnacksDashboardSpecial", { fg = p.red })
+hl("SnacksDashboardNormal", { fg = p.fg3, bg = p.bg0 })
+hl("SnacksDashboardDir", { fg = p.fg5 })
+hl("SnacksDashboardFile", { fg = p.fg3 })
+
 -- ── Messages / misc ───────────────────────────────────────────────────────────
 hl("ErrorMsg", { fg = p.red, bold = true })
 hl("WarningMsg", { fg = p.yellow, bold = true })
@@ -304,6 +306,41 @@ hl("MsgSeparator", { fg = p.bg3 })
 
 -- ── Additional UI highlights ──────────────────────────────────────────────────
 hl("CursorLine", { bg = p.bg2 })
-hl("LspReferenceText", { bg = p.bg3 })
-hl("IblIndent", { fg = p.bg3 })
-hl("IblScope", { fg = p.fg5 })
+hl("LspReferenceText", { bg = p.mix(p.bg0, p.blue, 0.15) })
+hl("LspReferenceRead", { bg = p.mix(p.bg0, p.blue, 0.15) })
+hl("LspReferenceWrite", { bg = p.mix(p.bg0, p.blue, 0.15) })
+end
+
+local palette = require("ui.palette")
+apply(palette)
+
+-- lucent-orng look (orange-first, like the opencode theme): shifts accent
+-- roles to orange while keeping the system theme's base bg/fg.
+-- Auto-enables on Last Horizon; force with vim.g.lucent_orng = true/false.
+do
+  local force = vim.g.lucent_orng
+  if force == true or (force ~= false and palette.theme_name == "last-horizon") then
+    local q = vim.deepcopy(palette)
+    q.orange = "#EC5B2B" -- primary accent / keywords
+    q.blue = "#EE7948" -- functions / operators (warm secondary)
+    q.magenta = "#fab387" -- numbers / constants (bright orange)
+    q.cyan = "#6ba1e6" -- strings (blue)
+    q.yellow = "#e5c07b" -- types
+    apply(q)
+    -- keywords in primary orange, bold (overrides the green defaults above)
+    hl("Statement", { fg = "#EC5B2B", bold = true })
+    hl("Keyword", { fg = "#EC5B2B", bold = true })
+    hl("@keyword", { fg = "#EC5B2B", bold = true })
+    hl("@keyword.return", { fg = "#EC5B2B", bold = true })
+    hl("@keyword.exception", { fg = "#e06c75", bold = true })
+  end
+end
+
+-- Re-apply the current theme (re-reading colors.toml) without a restart.
+function M.reload()
+	apply(require("ui.palette").reload())
+	vim.api.nvim_exec_autocmds("ColorScheme", {})
+end
+
+return M
+

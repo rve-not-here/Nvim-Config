@@ -6,9 +6,16 @@ if not vim.env.PATH:find(dotnet_tools, 1, true) then
 	vim.env.PATH = dotnet_tools .. ":" .. vim.env.PATH
 end
 
+-- composer global bins (pint) — same pattern as dotnet tools
+local composer_bin = vim.fn.expand("~/.config/composer/vendor/bin")
+if vim.fn.isdirectory(composer_bin) == 1 and not vim.env.PATH:find(composer_bin, 1, true) then
+	vim.env.PATH = composer_bin .. ":" .. vim.env.PATH
+end
+
 -- ── Line numbers ────────────────────────────────────────────
 opt.number = true
 opt.relativenumber = true
+vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- ── Indentation ─────────────────────────────────────────────
@@ -50,12 +57,13 @@ opt.undoreload = 10000
 opt.mouse = "a"
 opt.clipboard = "unnamedplus"
 opt.updatetime = 250
-opt.timeoutlen = 800
+opt.timeoutlen = 400
 opt.ttimeoutlen = 50 -- faster <Esc> response
 opt.startofline = false
 
 -- ── Completion (0.12+) ──────────────────────────────────────
-opt.completeopt = "menuone,noselect"
+-- aligned with blink preselect+auto_insert (noselect contradicted it)
+opt.completeopt = "menuone,noinsert,popup"
 opt.showtabline = 2
 vim.o.pumwidth = 40
 
@@ -63,7 +71,7 @@ vim.o.pumwidth = 40
 opt.wildmenu = true
 opt.wildmode = "full"
 opt.wildignorecase = true
-opt.sessionoptions = "buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+opt.sessionoptions = "buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
 -- ── Silence unused provider warnings ────────────────────────
 vim.g.loaded_node_provider = 0
@@ -71,9 +79,17 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
--- Fold (safe global default; OK for your setup)
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+-- Fold: safe global default is manual; treesitter sets expr per-buffer
+-- after start() succeeds (see plugins/treesitter.lua). Global expr
+-- evaluates TS per line even without a parser and slows/errors startup.
+vim.opt.foldmethod = "manual"
 vim.opt.foldenable = true
 vim.opt.foldlevel = 99
 vim.opt.foldminlines = 2
+
+-- ── Ported from NvChad options.lua (2026-08) ────────────────────
+vim.opt.numberwidth = 5
+vim.o.scroll = 15
+-- used by dotnet tooling / make integrations
+vim.g.dotnet_errors_only = true
+vim.g.dotnet_show_project_file = false

@@ -30,7 +30,8 @@ local function on_init_project(client, project_files)
 end
 
 ---@param client vim.lsp.Client
-local function refresh_diagnostics(client)
+---@param only_buf? integer refresh just this buffer (save path); nil refreshes all
+local function refresh_diagnostics(client, only_buf)
   local identifiers = {}
   local ok, caps = pcall(function()
     return client.dynamic_capabilities.capabilities.diagnosticProvider
@@ -52,15 +53,24 @@ local function refresh_diagnostics(client)
     identifiers = { nil }
   end
 
-  for buf, _ in pairs(client.attached_buffers) do
-    if vim.api.nvim_buf_is_loaded(buf) then
-      for _, id in pairs(identifiers) do
-        client:request(vim.lsp.protocol.Methods.textDocument_diagnostic, {
-          identifier = id,
-          textDocument = vim.lsp.util.make_text_document_params(buf),
-        }, nil, buf)
-      end
+  local function refresh(buf)
+    if not vim.api.nvim_buf_is_loaded(buf) then
+      return
     end
+    for _, id in pairs(identifiers) do
+      client:request(vim.lsp.protocol.Methods.textDocument_diagnostic, {
+        identifier = id,
+        textDocument = vim.lsp.util.make_text_document_params(buf),
+      }, nil, buf)
+    end
+  end
+
+  if only_buf then
+    refresh(only_buf)
+    return
+  end
+  for buf, _ in pairs(client.attached_buffers) do
+    refresh(buf)
   end
 end
 
@@ -127,32 +137,25 @@ local function handle_fix_all_action(client, command, bufnr)
   end)
 end
 
--- Locates the razor cohosting files bundled with a `dotnet tool install`
--- of roslyn-language-server (>= 5.8.0-1.26262.10). The install path contains
--- two version-number segments that shift on every `dotnet tool update`, so
--- this resolves it via glob instead of hardcoding a version.
----@return string|nil
-local function find_roslyn_razor_dir()
-  local pattern = vim.fn.expand(
-    "~/.dotnet/tools/.store/roslyn-language-server/*/roslyn-language-server.linux-x64/*/tools/*/linux-x64"
-  )
-  local matches = vim.fn.glob(pattern, false, true)
-  if #matches == 0 then
-    return nil
-  end
-  if #matches > 1 then
-    -- stale version left behind by a prior `dotnet tool update`; use the newest
-    table.sort(matches, function(a, b)
-      return vim.fn.getftime(a) > vim.fn.getftime(b)
-    end)
-  end
-  return matches[1]
+-- Razor cohosting (`--extension Microsoft.VisualStudioCode.RazorExtension.dll`)
+-- is loaded when the extension DLL is found next to the server. Note: loading
+-- this extension can make the server return empty diagnostics for some
+-- `textDocument/diagnostic` pulls; verify C# errors still surface after a
+-- restart and disable it again if they disappear.
+
+local server_bin = vim.fn.expand("~/.dotnet/tools/roslyn-language-server")
+if vim.fn.executable(server_bin) ~= 1 then
+  vim.notify("roslyn_ls: not executable: " .. server_bin, vim.log.levels.WARN, { title = "roslyn_ls" })
+  return
 end
 
-local razor_dir = find_roslyn_razor_dir()
+local server_root = fs.dirname(vim.fn.resolve(server_bin))
+
+local extension_path = fs.find("RoslynExtension.dll", { path = server_root })[1]
+  or fs.find("Microsoft.VisualStudioCode.RazorExtension.dll", { path = server_root })[1]
 
 local cmd = {
-  vim.fn.expand("~/.dotnet/tools/roslyn-language-server"),
+  server_bin,
   "--logLevel",
   "Information",
   "--extensionLogDirectory",
@@ -161,18 +164,10 @@ local cmd = {
 
 local filetypes = { "cs" }
 
-if razor_dir then
-  vim.list_extend(cmd, {
-    "--extension",
-    fs.joinpath(razor_dir, "Microsoft.VisualStudioCode.RazorExtension.dll"),
-  })
+if extension_path and vim.uv.fs_stat(extension_path) then
+  table.insert(cmd, "--extension")
+  table.insert(cmd, extension_path)
   table.insert(filetypes, "razor")
-else
-  vim.notify(
-    "roslyn_ls: razor cohosting files not found under ~/.dotnet/tools/.store — razor support disabled, cs still works",
-    vim.log.levels.WARN,
-    { title = "roslyn_ls" }
-  )
 end
 
 table.insert(cmd, "--stdio")
@@ -192,6 +187,12 @@ vim.lsp.config("roslyn_ls", {
   filetypes = filetypes,
 
   root_dir = function(bufnr, cb)
+    -- honor an explicitly selected solution (:RoslynTarget)
+    local selected = vim.g.roslyn_nvim_selected_solution
+    if type(selected) == "string" and selected ~= "" and uv.fs_stat(selected) then
+      cb(fs.dirname(selected))
+      return
+    end
     local bufname = vim.api.nvim_buf_get_name(bufnr)
     if not is_decompiled(bufname) then
       -- prefer solution root
@@ -208,6 +209,8 @@ vim.lsp.config("roslyn_ls", {
 
       if root_dir then
         cb(root_dir)
+      else
+        cb(vim.fn.getcwd())
       end
     else
       -- decompiled MetadataAsSource file: reuse existing client's root
@@ -225,18 +228,31 @@ vim.lsp.config("roslyn_ls", {
   on_init = {
     function(client)
       local root_dir = client.config.root_dir
-
-      for entry, type in fs.dir(root_dir) do
-        if type == "file" and (vim.endswith(entry, ".sln") or vim.endswith(entry, ".slnx")) then
-          on_init_sln(client, fs.joinpath(root_dir, entry))
-          return
-        end
+      if not root_dir then
+        return
       end
 
-      for entry, type in fs.dir(root_dir) do
-        if type == "file" and vim.endswith(entry, ".csproj") then
-          on_init_project(client, { fs.joinpath(root_dir, entry) })
-        end
+      -- honor an explicitly selected solution (:RoslynTarget)
+      local selected = vim.g.roslyn_nvim_selected_solution
+      if type(selected) == "string" and selected ~= "" and uv.fs_stat(selected) then
+        on_init_sln(client, selected)
+        return
+      end
+
+      -- prefer top-level .sln/.slnx, then recursive search (e.g. src/*.sln)
+      local sln = vim.fn.glob(fs.joinpath(root_dir, "*.sln"), false, true)[1]
+        or vim.fn.glob(fs.joinpath(root_dir, "*.slnx"), false, true)[1]
+        or vim.fn.glob(fs.joinpath(root_dir, "**/*.sln"), false, true)[1]
+        or vim.fn.glob(fs.joinpath(root_dir, "**/*.slnx"), false, true)[1]
+      if sln then
+        on_init_sln(client, sln)
+        return
+      end
+
+      local projs = vim.fn.glob(fs.joinpath(root_dir, "**/*.csproj"), false, true)
+      if #projs > 0 then
+        -- single notification with all projects, not one per file
+        on_init_project(client, projs)
       end
     end,
   },
@@ -246,13 +262,32 @@ vim.lsp.config("roslyn_ls", {
       return
     end
 
+    local timer = nil
     vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
       group = group,
       buffer = bufnr,
       callback = function()
-        refresh_diagnostics(client)
+        -- debounce: InsertLeave can fire rapidly in large solutions
+        if timer then
+          timer:stop()
+          timer:close()
+          timer = nil
+        end
+        timer = vim.uv.new_timer()
+        timer:start(300, 0, function()
+          timer:stop()
+          timer:close()
+          timer = nil
+          vim.schedule(function()
+            -- only the saved buffer; full refresh happens on
+            -- projectInitializationComplete below
+            if vim.api.nvim_buf_is_valid(bufnr) then
+              refresh_diagnostics(client, bufnr)
+            end
+          end)
+        end)
       end,
-      desc = "roslyn_ls: refresh diagnostics",
+      desc = "roslyn_ls: refresh diagnostics (debounced)",
     })
   end,
 
@@ -349,13 +384,11 @@ vim.lsp.config("roslyn_ls", {
     end,
 
     ["razor/provideDynamicFileInfo"] = function(_, _, _)
-      -- With the --extension flag set above, roslyn_ls shouldn't need this
-      -- legacy method — it was part of the old dual-process rzls.nvim
-      -- architecture. If this fires, it may mean cohosting isn't fully
-      -- active; check :LspInfo for the cmd actually used and confirm the
-      -- razor extension path resolved.
+      -- Legacy Razor method: only fires when the cohosting extension is NOT
+      -- loaded. Kept as a safety net in case a razor file is somehow opened
+      -- without the extension DLL being found.
       vim.notify(
-        "roslyn_ls: received legacy razor/provideDynamicFileInfo despite cohosting being configured — check :LspInfo",
+        "roslyn_ls: razor/provideDynamicFileInfo received but razor cohosting extension was not loaded",
         vim.log.levels.WARN,
         { title = "roslyn_ls" }
       )
@@ -454,7 +487,13 @@ vim.api.nvim_create_user_command("RoslynTarget", function()
   }, function(choice)
     if choice then
       vim.g.roslyn_nvim_selected_solution = choice
-      vim.cmd("LspRestart roslyn_ls")
+      -- native restart (:LspRestart is nvim-lspconfig-only and doesn't exist here)
+      for _, c in ipairs(vim.lsp.get_clients({ name = "roslyn_ls" })) do
+        c:stop()
+      end
+      vim.defer_fn(function()
+        vim.cmd("edit")
+      end, 300)
       vim.notify("Switched to: " .. vim.fn.fnamemodify(choice, ":t"), vim.log.levels.INFO)
     end
   end)

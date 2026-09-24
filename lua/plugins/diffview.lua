@@ -1,7 +1,6 @@
-local ok, diffview = pcall(require, "diffview")
-if not ok then return end
-
-diffview.setup()
+-- NOTE: no require/setup here on purpose (startup saving): diffview runs
+-- on defaults and its :Diffview* commands exist via rtp without loading it.
+-- Keymaps below are plain :cmd strings, so the plugin loads on first use.
 
 -- Keymaps
 vim.keymap.set("n", "<leader>gv", "<cmd>DiffviewOpen<cr>", { desc = "Diffview open" })

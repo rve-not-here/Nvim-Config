@@ -47,4 +47,11 @@ vim.keymap.set("n", "[t", function()
 	require("todo-comments").jump_prev()
 end, { desc = "Prev todo" })
 
-vim.keymap.set("n", "<leader>Ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
+-- NOTE: locked snacks.nvim has no todo_comments picker (added upstream later),
+-- so find-todos goes through fzf-lua grep instead.
+vim.keymap.set("n", "<leader>Ft", function()
+  require("fzf-lua").grep({
+    search = "TODO|FIXME|FIX|HACK|WARN|NOTE|PERF|TEST",
+    no_esc = true,
+  })
+end, { desc = "Find todos" })

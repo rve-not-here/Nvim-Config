@@ -54,15 +54,16 @@ gitsigns.setup({
     end
 
     -- Navigation (without helper due to expr option)
+    -- nav_hunk() is the current API (next_hunk/prev_hunk are deprecated)
     vim.keymap.set("n", "]c", function()
       if vim.wo.diff then return "]c" end
-      vim.schedule(function() gs.next_hunk() end)
+      vim.schedule(function() gs.nav_hunk("next") end)
       return "<Ignore>"
     end, { buffer = bufnr, expr = true, desc = "Next hunk" })
 
     vim.keymap.set("n", "[c", function()
       if vim.wo.diff then return "[c" end
-      vim.schedule(function() gs.prev_hunk() end)
+      vim.schedule(function() gs.nav_hunk("prev") end)
       return "<Ignore>"
     end, { buffer = bufnr, expr = true, desc = "Previous hunk" })
     -- Actions
@@ -75,9 +76,9 @@ gitsigns.setup({
     map("n", "<leader>hR", gs.reset_buffer, "Reset buffer")
     map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
     map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame line")
-    map("n", "<leader>tb", gs.toggle_current_line_blame, "Toggle blame")
+    map("n", "<leader>ha", gs.toggle_current_line_blame, "Toggle blame")
     map("n", "<leader>hd", gs.diffthis, "Diff this")
     map("n", "<leader>hD", function() gs.diffthis("~") end, "Diff this ~")
-    map("n", "<leader>td", gs.toggle_deleted, "Toggle deleted")
+    map("n", "<leader>ht", gs.toggle_deleted, "Toggle deleted")
   end,
 })

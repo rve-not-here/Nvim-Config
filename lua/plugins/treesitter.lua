@@ -19,6 +19,16 @@ local ensure_installed = {
 	"razor",
 	"html",
 	"css",
+	-- ported from NvChad (2026-08)
+	"typescript",
+	"tsx",
+	"hyprlang",
+	"caddy",
+	-- web + php (2026-09)
+	"javascript",
+	"jsdoc",
+	"php",
+	"phpdoc",
 }
 
 -- Install any parsers not already present. `nvim-treesitter`'s post-rewrite
@@ -40,11 +50,45 @@ end
 
 -- Highlighting/indent are no longer enabled via `.setup()` — start them
 -- per-buffer on FileType instead.
+-- NOTE: pattern is filetypes, not parser names (c_sharp->cs, tsx->typescriptreact).
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = ensure_installed,
+	group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
+	pattern = {
+		"lua",
+		"vim",
+		"help",
+		"json",
+		"yaml",
+		"markdown",
+		"bash",
+		"regex",
+		"cs",
+		"razor",
+		"html",
+		"css",
+		"typescript",
+		"typescriptreact",
+		"javascript",
+		"javascriptreact",
+		"jsdoc",
+		"php",
+		"phpdoc",
+		"caddy",
+		"hyprlang",
+	},
 	callback = function(args)
-		pcall(vim.treesitter.start, args.buf)
-		vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		if vim.b[args.buf].large_file then
+			return
+		end
+		if vim.bo[args.buf].buftype ~= "" then
+			return
+		end
+		local ok = pcall(vim.treesitter.start, args.buf)
+		if ok then
+			vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			vim.wo.foldmethod = "expr"
+			vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		end
 	end,
 })
 

@@ -28,12 +28,10 @@ local function reload()
 		package.loaded["ui.palette"] = nil
 		package.loaded["ui.statusline"] = nil
 		package.loaded["plugins.colorscheme"] = nil
-		package.loaded["plugins.tiny-inline-diagnostic"] = nil
 
 		pcall(require, "plugins.colorscheme")
 		vim.api.nvim_exec_autocmds("ColorScheme", {})
 		pcall(require, "ui.statusline")
-		pcall(require, "plugins.tiny-inline-diagnostic")
 		vim.cmd("redraw!")
 	end)
 end

@@ -462,6 +462,51 @@ vim.lsp.config("roslyn_ls", {
 vim.lsp.enable("roslyn_ls")
 
 -- ═══════════════════════════════════════════════════════════════
+-- DOC-COMMENT AUTO-INSERT (from roslyn.nvim wiki tips):
+-- typing `/` after `//` expands the server's /// template.
+-- ═══════════════════════════════════════════════════════════════
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("roslyn_autoinsert", { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    local bufnr = args.buf
+    if not client or (client.name ~= "roslyn_ls" and client.name ~= "roslyn") then
+      return
+    end
+    vim.api.nvim_create_autocmd("InsertCharPre", {
+      desc = "Roslyn: expand /// doc template on '/'",
+      buffer = bufnr,
+      callback = function()
+        if vim.v.char ~= "/" then
+          return
+        end
+        local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+        row, col = row - 1, col + 1
+        local params = {
+          _vs_textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+          _vs_position = { line = row, character = col },
+          _vs_ch = "/",
+          _vs_options = {
+            tabSize = vim.bo[bufnr].tabstop,
+            insertSpaces = vim.bo[bufnr].expandtab,
+          },
+        }
+        -- send only after the buffer actually changed
+        vim.defer_fn(function()
+          client:request("textDocument/_vs_onAutoInsert", params, function(err, result)
+            if err or not result or not result._vs_textEdit then
+              return
+            end
+            vim.snippet.expand(result._vs_textEdit.newText)
+          end, bufnr)
+        end, 1)
+      end,
+    })
+  end,
+})
+
+-- ═══════════════════════════════════════════════════════════════
 -- ROSLYN TARGET SWITCHING:
 -- ═══════════════════════════════════════════════════════════════
 

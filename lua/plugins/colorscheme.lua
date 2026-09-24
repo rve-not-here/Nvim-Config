@@ -177,21 +177,29 @@ hl("@tag.attribute", { fg = p.cyan })
 hl("@tag.delimiter", { fg = p.fg5 })
 
 -- ── Diagnostics ───────────────────────────────────────────────────────────────
-hl("DiagnosticError", { fg = p.red })
-hl("DiagnosticWarn", { fg = p.yellow })
-hl("DiagnosticInfo", { fg = p.blue })
-hl("DiagnosticHint", { fg = p.cyan })
+-- static diagnostic hues: instantly recognizable on ANY system theme,
+-- deliberately not synced (literals survive the lucent layer untouched)
+hl("DiagnosticError", { fg = "#e06c75" })
+hl("DiagnosticWarn", { fg = "#e5c07b" })
+hl("DiagnosticInfo", { fg = "#61afef" })
+hl("DiagnosticHint", { fg = "#56b6c2" })
 hl("DiagnosticOk", { fg = p.green })
 
-hl("DiagnosticUnderlineError", { sp = p.red, undercurl = true })
-hl("DiagnosticUnderlineWarn", { sp = p.yellow, undercurl = true })
-hl("DiagnosticUnderlineInfo", { sp = p.blue, undercurl = true })
-hl("DiagnosticUnderlineHint", { sp = p.cyan, undercurl = true })
+hl("DiagnosticUnderlineError", { sp = "#e06c75", undercurl = true })
+hl("DiagnosticUnderlineWarn", { sp = "#e5c07b", undercurl = true })
+hl("DiagnosticUnderlineInfo", { sp = "#61afef", undercurl = true })
+hl("DiagnosticUnderlineHint", { sp = "#56b6c2", undercurl = true })
 
-hl("DiagnosticSignError", { fg = p.red })
-hl("DiagnosticSignWarn", { fg = p.yellow })
-hl("DiagnosticSignInfo", { fg = p.blue })
-hl("DiagnosticSignHint", { fg = p.cyan })
+hl("DiagnosticSignError", { fg = "#e06c75" })
+hl("DiagnosticSignWarn", { fg = "#e5c07b" })
+hl("DiagnosticSignInfo", { fg = "#61afef" })
+hl("DiagnosticSignHint", { fg = "#56b6c2" })
+
+-- native overlay text: bold severity colors, arrow inherits the line
+hl("DiagnosticVirtualTextError", { fg = "#e06c75", bold = true })
+hl("DiagnosticVirtualTextWarn", { fg = "#e5c07b", bold = true })
+hl("DiagnosticVirtualTextInfo", { fg = "#61afef" })
+hl("DiagnosticVirtualTextHint", { fg = "#56b6c2" })
 
 -- ── LSP semantic tokens ───────────────────────────────────────────────────────
 hl("@lsp.type.namespace", { link = "@namespace" })

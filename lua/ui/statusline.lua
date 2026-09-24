@@ -72,7 +72,7 @@ local buf_modified = {
 }
 
 local buf_close = {
-  provider = "  ",
+  provider = " " .. vim.fn.nr2char(0xf00d) .. " ",
   hl = { fg = p.gray },
   on_click = {
     callback = function(_, minwid)
@@ -113,15 +113,17 @@ local bufferline = utils.make_buflist({
 ------------------------------------------------------------
 local mode = {
   provider = function()
+    -- nr2char codes: literal PUA glyphs don't survive editing, so
+    -- FontAwesome codepoints are used (gear/pencil/eye/table/exchange/term)
     local icons = {
-      n = "",
-      i = "",
-      v = "",
-      V = "",
-      ["\22"] = "",
-      c = " ",
-      r = "",
-      t = "",
+      n = vim.fn.nr2char(0xf013),
+      i = vim.fn.nr2char(0xf040),
+      v = vim.fn.nr2char(0xf06e),
+      V = vim.fn.nr2char(0xf06e),
+      ["\22"] = vim.fn.nr2char(0xf0ce),
+      c = " ",
+      r = vim.fn.nr2char(0xf0ec),
+      t = vim.fn.nr2char(0xf120),
     }
     local m = vim.fn.mode()
     return " " .. (icons[m] or m:upper()) .. " "
@@ -256,10 +258,10 @@ local diagnostics = {
   provider = function()
     local diag = vim.diagnostic.count(0) or {}
     local severities = {
-      { vim.diagnostic.severity.ERROR, "DiagnosticSignError", " " },
-      { vim.diagnostic.severity.WARN, "DiagnosticSignWarn", " " },
-      { vim.diagnostic.severity.INFO, "DiagnosticSignInfo", " " },
-      { vim.diagnostic.severity.HINT, "DiagnosticSignHint", " " },
+      { vim.diagnostic.severity.ERROR, "DiagnosticSignError", vim.fn.nr2char(0xf06a) .. " " },
+      { vim.diagnostic.severity.WARN, "DiagnosticSignWarn", vim.fn.nr2char(0xf071) .. " " },
+      { vim.diagnostic.severity.INFO, "DiagnosticSignInfo", vim.fn.nr2char(0xf05a) .. " " },
+      { vim.diagnostic.severity.HINT, "DiagnosticSignHint", vim.fn.nr2char(0xf0eb) .. " " },
     }
     local parts = {}
     for _, s in ipairs(severities) do

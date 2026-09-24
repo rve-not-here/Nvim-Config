@@ -102,10 +102,10 @@ vim.api.nvim_create_user_command("RoslynDebug", function()
   )
 end, { desc = "Debug roslyn LSP capabilities" })
 
-vim.keymap.set("n", "<leader>Dr", function()
+vim.keymap.set("n", "<leader>mr", function()
   dotnet_cmd("run")
 end, { desc = "Dotnet run" })
-vim.keymap.set("n", "<leader>Db", function()
+vim.keymap.set("n", "<leader>mb", function()
   dotnet_bg("build")
 end, { desc = "Dotnet build" })
 
@@ -114,17 +114,17 @@ end, { desc = "Dotnet build" })
 -- ═══════════════════════════════════════════════════════════════
 
 -- Run .NET tests (raw terminal)
-vim.keymap.set("n", "<leader>tF", function()
+vim.keymap.set("n", "<leader>mt", function()
 	vim.cmd("split | terminal dotnet test")
 end, { desc = "Run all tests (dotnet test)" })
 
 -- Watch .NET tests
-vim.keymap.set("n", "<leader>Dw", function()
+vim.keymap.set("n", "<leader>mw", function()
 	vim.cmd("split | terminal dotnet watch test")
 end, { desc = "Watch .NET tests" })
 
 -- Add NuGet package
-vim.keymap.set("n", "<leader>Dn", function()
+vim.keymap.set("n", "<leader>mn", function()
 	local package = vim.fn.input("Package: ")
 	if package ~= "" then
 		vim.fn.system("dotnet add package " .. package)

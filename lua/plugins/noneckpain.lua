@@ -38,8 +38,12 @@ local function resize_by(delta)
 end
 -- NOTE: kept off the <leader>z prefix ([z / ]z instead) so the toggle
 -- fires instantly instead of waiting timeoutlen for a follow-up key
-vim.keymap.set("n", "]z", function() resize_by(10) end, { desc = "Widen center (+10)" })
-vim.keymap.set("n", "[z", function() resize_by(-10) end, { desc = "Narrow center (-10)" })
+vim.keymap.set("n", "]z", function()
+  resize_by(10)
+end, { desc = "Widen center (+10)" })
+vim.keymap.set("n", "[z", function()
+  resize_by(-10)
+end, { desc = "Narrow center (-10)" })
 
 -- auto-center prose buffers (never auto-disables)
 vim.api.nvim_create_autocmd("FileType", {

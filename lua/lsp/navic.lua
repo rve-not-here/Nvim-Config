@@ -1,5 +1,7 @@
 local ok, navic = pcall(require, "nvim-navic")
-if not ok then return end
+if not ok then
+  return
+end
 
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)

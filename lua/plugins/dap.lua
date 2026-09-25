@@ -1,5 +1,7 @@
 local ok, dap = pcall(require, "dap")
-if not ok then return end
+if not ok then
+  return
+end
 
 -- ── Adapter ──────────────────────────────────────────────────────────────────
 -- Prefer mason netcoredbg when present (ported from NvChad), fall back to PATH.
@@ -70,65 +72,83 @@ end
 
 dap.configurations.cs = {
   {
-    type         = "coreclr",
-    name         = "Launch - .NET",
-    request      = "launch",
-    program      = program_for_cs,       -- called at debug-time, not at config load
-    cwd          = "${workspaceFolder}",
-    stopAtEntry  = false,
+    type = "coreclr",
+    name = "Launch - .NET",
+    request = "launch",
+    program = program_for_cs, -- called at debug-time, not at config load
+    cwd = "${workspaceFolder}",
+    stopAtEntry = false,
     env = {
       ASPNETCORE_ENVIRONMENT = "Development",
     },
   },
   {
-    type      = "coreclr",
-    name      = "Attach - .NET",
-    request   = "attach",
+    type = "coreclr",
+    name = "Attach - .NET",
+    request = "attach",
     processId = require("dap.utils").pick_process,
   },
 }
 
 -- ── dap-ui ────────────────────────────────────────────────────────────────────
 local ok_ui, dapui = pcall(require, "dapui")
-if not ok_ui then return end
+if not ok_ui then
+  return
+end
 
 dapui.setup({
   layouts = {
     {
       elements = {
-        { id = "scopes",      size = 0.4 },
+        { id = "scopes", size = 0.4 },
         { id = "breakpoints", size = 0.2 },
-        { id = "stacks",      size = 0.2 },
-        { id = "watches",     size = 0.2 },
+        { id = "stacks", size = 0.2 },
+        { id = "watches", size = 0.2 },
       },
-      size     = 40,
+      size = 40,
       position = "left",
     },
     {
       elements = {
-        { id = "repl",    size = 0.5 },
+        { id = "repl", size = 0.5 },
         { id = "console", size = 0.5 },
       },
-      size     = 12,
+      size = 12,
       position = "bottom",
     },
   },
 })
 
-dap.listeners.after.event_initialized["dapui_config"]  = function() dapui.open() end
-dap.listeners.before.event_terminated["dapui_config"]  = function() dapui.close() end
-dap.listeners.before.event_exited["dapui_config"]      = function() dapui.close() end
+dap.listeners.after.event_initialized["dapui_config"] = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+  dapui.close()
+end
 
 -- ── F-key maps + peek (ported from NvChad custom-config) ─────────────────────
 vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "▶", texthl = "Error", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "WarningMsg", linehl = "", numhl = "" })
 
-vim.keymap.set("n", "<F5>", function() dap.continue() end, { desc = "DAP: Continue/Start" })
-vim.keymap.set("n", "<F9>", function() dap.toggle_breakpoint() end, { desc = "DAP: Toggle breakpoint" })
-vim.keymap.set("n", "<F10>", function() dap.step_over() end, { desc = "DAP: Step over" })
-vim.keymap.set("n", "<F11>", function() dap.step_into() end, { desc = "DAP: Step into" })
-vim.keymap.set("n", "<F8>", function() dap.step_out() end, { desc = "DAP: Step out" })
+vim.keymap.set("n", "<F5>", function()
+  dap.continue()
+end, { desc = "DAP: Continue/Start" })
+vim.keymap.set("n", "<F9>", function()
+  dap.toggle_breakpoint()
+end, { desc = "DAP: Toggle breakpoint" })
+vim.keymap.set("n", "<F10>", function()
+  dap.step_over()
+end, { desc = "DAP: Step over" })
+vim.keymap.set("n", "<F11>", function()
+  dap.step_into()
+end, { desc = "DAP: Step into" })
+vim.keymap.set("n", "<F8>", function()
+  dap.step_out()
+end, { desc = "DAP: Step out" })
 vim.keymap.set("n", "<F6>", function()
   local ok_nt, neotest = pcall(require, "neotest")
   if ok_nt then

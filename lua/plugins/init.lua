@@ -1,12 +1,12 @@
 local function safe(req)
-	local ok, mod = pcall(require, req)
-	if not ok then
-		vim.notify("Missing plugin module: " .. req, vim.log.levels.WARN)
-		return
-	end
-	if type(mod) == "function" then
-		mod()
-	end
+  local ok, mod = pcall(require, req)
+  if not ok then
+    vim.notify("Missing plugin module: " .. req, vim.log.levels.WARN)
+    return
+  end
+  if type(mod) == "function" then
+    mod()
+  end
 end
 
 safe("plugins.blink")

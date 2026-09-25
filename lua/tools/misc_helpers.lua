@@ -2,23 +2,20 @@ local M = {}
 
 -- creates a slug for the currently selected text and puts it into the clipboard
 function M.slugify_visual_selection()
-  local selection = vim.fn.getregion(
-    vim.fn.getpos("v"),
-    vim.fn.getpos("."),
-    { type = vim.fn.mode() }
-  )
+  local selection = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
 
-  local slug = table.concat(selection, " ")
-      :lower()
-      :gsub("ä", "ae")
-      :gsub("ö", "oe")
-      :gsub("ü", "ue")
-      :gsub("ß", "ss")
-      :gsub("[^%w%s_-]", "")
-      :gsub("[%s_]+", "-")
-      :gsub("-+", "-")
-      :gsub("^-", "")
-      :gsub("-$", "")
+  local slug = table
+    .concat(selection, " ")
+    :lower()
+    :gsub("ä", "ae")
+    :gsub("ö", "oe")
+    :gsub("ü", "ue")
+    :gsub("ß", "ss")
+    :gsub("[^%w%s_-]", "")
+    :gsub("[%s_]+", "-")
+    :gsub("-+", "-")
+    :gsub("^-", "")
+    :gsub("-$", "")
 
   vim.fn.setreg("+", slug)
   vim.notify("Copied slug: " .. slug)
@@ -42,9 +39,6 @@ function M.toggle_markdown_checkbox()
   vim.api.nvim_set_current_line(updated)
 end
 
-M.augroup = vim.api.nvim_create_augroup(
-  "markdown_checkbox_toggle",
-  { clear = true }
-)
+M.augroup = vim.api.nvim_create_augroup("markdown_checkbox_toggle", { clear = true })
 
 return M

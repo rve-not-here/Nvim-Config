@@ -1,5 +1,7 @@
 local ok, oil = pcall(require, "oil")
-if not ok then return end
+if not ok then
+  return
+end
 
 oil.setup({
   default_file_explorer = true,
@@ -95,4 +97,3 @@ oil.setup({
 vim.keymap.set("n", "<A-a>", function()
   require("oil").open_float()
 end, { desc = "Oil float" })
-

@@ -8,10 +8,12 @@ function M.pick()
     vim.notify("Git hunks: no file", vim.log.levels.WARN)
     return
   end
-  local res = vim.system(
-    { "git", "--no-pager", "diff", "--no-color", "--no-ext-diff", "-U0", "HEAD", "--", file },
-    { text = true, cwd = vim.fs.dirname(file) }
-  ):wait()
+  local res = vim
+    .system(
+      { "git", "--no-pager", "diff", "--no-color", "--no-ext-diff", "-U0", "HEAD", "--", file },
+      { text = true, cwd = vim.fs.dirname(file) }
+    )
+    :wait()
   if res.code ~= 0 then
     vim.notify("Git hunks: not a repo or git error", vim.log.levels.WARN)
     return

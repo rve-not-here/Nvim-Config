@@ -3,13 +3,13 @@ local opt = vim.opt
 -- ── PATH ────────────────────────────────────────────────────
 local dotnet_tools = vim.fn.expand("~/.dotnet/tools")
 if not vim.env.PATH:find(dotnet_tools, 1, true) then
-	vim.env.PATH = dotnet_tools .. ":" .. vim.env.PATH
+  vim.env.PATH = dotnet_tools .. ":" .. vim.env.PATH
 end
 
 -- composer global bins (pint) — same pattern as dotnet tools
 local composer_bin = vim.fn.expand("~/.config/composer/vendor/bin")
 if vim.fn.isdirectory(composer_bin) == 1 and not vim.env.PATH:find(composer_bin, 1, true) then
-	vim.env.PATH = composer_bin .. ":" .. vim.env.PATH
+  vim.env.PATH = composer_bin .. ":" .. vim.env.PATH
 end
 
 -- ── Line numbers ────────────────────────────────────────────

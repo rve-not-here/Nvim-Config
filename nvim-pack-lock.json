@@ -52,6 +52,10 @@
       "rev": "6c39ae7b11abe479fbe1bc81bf00ac6bca7afa07",
       "src": "https://github.com/echasnovski/mini.ai"
     },
+    "mini.icons": {
+      "rev": "f642e3ba8c12afbc8f32f6d77ef6597eac56786f",
+      "src": "https://github.com/echasnovski/mini.icons"
+    },
     "mini.surround": {
       "rev": "33a2ebe5df8eb4751828fcba133e18ed0fbbdfab",
       "src": "https://github.com/echasnovski/mini.surround"

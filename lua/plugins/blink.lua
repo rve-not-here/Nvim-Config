@@ -1,5 +1,7 @@
 local ok, blink = pcall(require, "blink.cmp")
-if not ok then return end
+if not ok then
+  return
+end
 
 blink.setup({
   snippets = { preset = "luasnip" },
@@ -10,7 +12,7 @@ blink.setup({
     },
   },
   fuzzy = {
-    implementation = "lua",
+    implementation = "prefer_rust",
   },
   completion = {
     accept = {

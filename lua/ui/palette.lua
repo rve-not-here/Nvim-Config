@@ -14,7 +14,7 @@ local function read_colors_toml()
   end
   local colors = {}
   for line in f:lines() do
-    local key, val = line:match("^%s*([%w_]+)%s*=%s*\"(#[0-9a-fA-F]+)\"")
+    local key, val = line:match('^%s*([%w_]+)%s*=%s*"(#[0-9a-fA-F]+)"')
     if key and val then
       colors[key] = val:lower()
     end

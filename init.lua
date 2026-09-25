@@ -25,6 +25,7 @@ vim.pack.add({
   "https://github.com/SmiteshP/nvim-navic",
   "https://github.com/echasnovski/mini.surround",
   "https://github.com/echasnovski/mini.ai",
+  "https://github.com/echasnovski/mini.icons",
   "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
   "https://github.com/stevearc/oil.nvim",

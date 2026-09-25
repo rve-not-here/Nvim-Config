@@ -222,7 +222,5 @@ autocmd("FileType", {
   end,
 })
 
-
-
 -- Limit syntax highlighting to 500 columns (set once, no per-enter autocmd)
 vim.o.synmaxcol = 500

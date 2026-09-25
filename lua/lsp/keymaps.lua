@@ -16,19 +16,22 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- Actions
     map("<leader>rn", vim.lsp.buf.rename, "Rename")
     map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-    map("<leader>cf", function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Format")
+    map("<leader>cf", function()
+      require("conform").format({ async = true, lsp_format = "fallback" })
+    end, "Format")
 
     -- Diagnostics (goto_next/goto_prev are deprecated on 0.11+)
-    map("]d", function() vim.diagnostic.jump({ count = 1 }) end, "Next diagnostic")
-    map("[d", function() vim.diagnostic.jump({ count = -1 }) end, "Previous diagnostic")
+    map("]d", function()
+      vim.diagnostic.jump({ count = 1 })
+    end, "Next diagnostic")
+    map("[d", function()
+      vim.diagnostic.jump({ count = -1 })
+    end, "Previous diagnostic")
     map("<leader>e", vim.diagnostic.open_float, "Diagnostic float")
 
     -- Inlay hints
     map("<leader>ci", function()
-      vim.lsp.inlay_hint.enable(
-        not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }),
-        { bufnr = event.buf }
-      )
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }), { bufnr = event.buf })
     end, "Toggle inlay hints")
   end,
 })

@@ -34,6 +34,16 @@ local function plugin_name(p)
   return (p.spec and p.spec.name) or vim.fn.fnamemodify(p.path, ":t")
 end
 
+---Re-render the dashboard if it is open so the update count refreshes live.
+local function refresh_dashboard()
+  vim.schedule(function()
+    local ok, dashboard = pcall(require, "snacks.dashboard")
+    if ok and dashboard and dashboard.update then
+      pcall(dashboard.update)
+    end
+  end)
+end
+
 function M.check(callback)
   local plugins = vim.pack.get()
   local pending = {}
@@ -56,6 +66,7 @@ function M.check(callback)
       local data = { count = #names, total = total, names = names, checked_at = os.time() }
       write_cache(data)
       MChecked = true
+      refresh_dashboard()
       if callback then
         callback(data)
       elseif #names > 0 then
@@ -111,8 +122,49 @@ vim.api.nvim_create_user_command("PackCheck", function()
   M.check(function(data)
     if data.count == 0 then
       vim.notify("All " .. data.total .. " plugins current", vim.log.levels.INFO, { title = "pack" })
+    else
+      vim.notify(
+        data.count .. " plugin update(s): " .. table.concat(data.names, ", "),
+        vim.log.levels.INFO,
+        { title = "pack" }
+      )
     end
   end)
 end, { desc = "Check for plugin updates now" })
+
+-- Keep the dashboard cache fresh after vim.pack changes it.
+-- vim.pack.update() shows a confirm buffer; the actual checkout (and the
+-- PackChanged event) only happens after :write, long after M.check ran, so
+-- without this the dashboard keeps showing the stale "1 plugin update(s)".
+local refresh_timer = nil
+local function schedule_refresh()
+  if refresh_timer then
+    pcall(vim.fn.timer_stop, refresh_timer)
+    refresh_timer = nil
+  end
+  -- debounce: vim.pack fires one event per plugin, wait for the batch
+  refresh_timer = vim.fn.timer_start(2000, function()
+    refresh_timer = nil
+    M.check()
+  end)
+end
+
+local pack_group = vim.api.nvim_create_augroup("pack_status_refresh", { clear = true })
+vim.api.nvim_create_autocmd("PackChanged", {
+  group = pack_group,
+  desc = "Notify on plugin update and refresh dashboard update count",
+  callback = function(ev)
+    local kind = ev.data and ev.data.kind
+    local name = (ev.data and ev.data.spec and ev.data.spec.name)
+      or (ev.data and ev.data.path and vim.fn.fnamemodify(ev.data.path, ":t"))
+      or "plugin"
+    if kind == "update" then
+      vim.schedule(function()
+        vim.notify("Updated " .. name, vim.log.levels.INFO, { title = "pack" })
+      end)
+    end
+    schedule_refresh()
+  end,
+})
 
 return M

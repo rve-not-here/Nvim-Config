@@ -13,5 +13,4 @@ Two native builds, once:
 
 ```sh
 nvim --headless -c "lua require('blink.cmp').build():pwait()" -c "qa!"
-make -C ~/.local/share/nvim/site/pack/core/opt/LuaSnip install_jsregexp
 ```

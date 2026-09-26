@@ -1,0 +1,7 @@
+{
+  "XML doc summary": {
+    "prefix": "///",
+    "body": ["///<summary>", "/// $1", "///</summary>"],
+    "description": "C# XML doc summary block"
+  }
+}

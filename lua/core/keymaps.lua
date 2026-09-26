@@ -63,6 +63,10 @@ end, { desc = "Toggle DAP UI" })
 -- ── explorer ──────────────────────────────────────────────────────────────────
 map("n", "<leader>-", "<cmd>Oil<CR>", { desc = "Open file explorer" })
 
+-- :Undotree is opt-in on 0.12+ and toggles when already open
+vim.cmd("packadd nvim.undotree")
+map("n", "<leader>u", "<cmd>Undotree<CR>", { desc = "Undo tree" })
+
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- ── plugins ───────────────────────────────────────────────────────────────────

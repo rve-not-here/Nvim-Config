@@ -4,7 +4,8 @@ if not ok then
 end
 
 blink.setup({
-  snippets = { preset = "luasnip" },
+  -- native vim.snippet sessions (friendly-snippets + ./snippets/*.json)
+  snippets = { preset = "default" },
   sources = {
     default = { "lsp", "path", "snippets", "buffer" },
     per_filetype = {
@@ -27,11 +28,8 @@ blink.setup({
     },
     documentation = {
       auto_show = true,
-      window = { border = "single" },
     },
-    menu = {
-      border = "single",
-    },
+    menu = {},
   },
   signature = { enabled = true },
   keymap = {

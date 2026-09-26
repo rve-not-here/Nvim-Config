@@ -1,13 +1,5 @@
 {
   "plugins": {
-    "Comment.nvim": {
-      "rev": "e30b7f2008e52442154b66f7c519bfd2f1e32acb",
-      "src": "https://github.com/numToStr/Comment.nvim"
-    },
-    "LuaSnip": {
-      "rev": "0abc8f390b278c3b4aabc4c004ac8a088b65cf24",
-      "src": "https://github.com/L3MON4D3/LuaSnip"
-    },
     "blink.cmp": {
       "rev": "8219b58f1c11a2fb1644d3c7116c509fa8348ec0",
       "src": "https://github.com/Saghen/blink.cmp"
@@ -52,10 +44,6 @@
       "rev": "6c39ae7b11abe479fbe1bc81bf00ac6bca7afa07",
       "src": "https://github.com/echasnovski/mini.ai"
     },
-    "mini.icons": {
-      "rev": "f642e3ba8c12afbc8f32f6d77ef6597eac56786f",
-      "src": "https://github.com/echasnovski/mini.icons"
-    },
     "mini.surround": {
       "rev": "33a2ebe5df8eb4751828fcba133e18ed0fbbdfab",
       "src": "https://github.com/echasnovski/mini.surround"
@@ -69,7 +57,7 @@
       "src": "https://github.com/Issafalcon/neotest-dotnet"
     },
     "no-neck-pain.nvim": {
-      "rev": "38b8a0b04676beeb923e61e4a27b07df366f54d2",
+      "rev": "017237cc0151c33c6e9864c03f2b7145634c8ad1",
       "src": "https://github.com/shortcuts/no-neck-pain.nvim"
     },
     "nvim-autopairs": {
@@ -131,10 +119,6 @@
     "todo-comments.nvim": {
       "rev": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668",
       "src": "https://github.com/folke/todo-comments.nvim"
-    },
-    "undotree": {
-      "rev": "5721c3fb3876f3e772251a23d1ab0948899a0216",
-      "src": "https://github.com/jiaoshijie/undotree"
     },
     "vim-fugitive": {
       "rev": "3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0",

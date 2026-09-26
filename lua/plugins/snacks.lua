@@ -26,7 +26,6 @@ snacks.setup({
       debug = "",
       trace = "󰌆",
     },
-    border = "single",
     filter = function(notif)
       for _, pattern in ipairs(banned_patterns) do
         if (notif.msg and notif.msg:match(pattern)) or (notif.title and notif.title:match(pattern)) then

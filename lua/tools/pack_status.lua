@@ -1,7 +1,9 @@
 -- Background vim.pack update check with on-disk cache.
 -- vim.pack has no "outdated" API, so we compare each plugin's installed rev
 -- against its upstream HEAD via `git ls-remote` (batched, async, deferred so
--- startup stays fast). Result is read by the dashboard section.
+-- startup stays fast). A mismatch against the lockfile rev is confirmed
+-- against the on-disk HEAD before flagging, since the lockfile can go stale.
+-- Result is read by the dashboard section.
 local M = {}
 
 M.cache_path = vim.fn.stdpath("state") .. "/pack-updates.json"
@@ -92,7 +94,17 @@ function M.check(callback)
           local remote = res.stdout:match("^(%x+)")
           local local_rev = p.rev or ""
           if remote and local_rev ~= "" and remote:sub(1, #local_rev) ~= local_rev then
-            names[#names + 1] = plugin_name(p)
+            -- The lockfile rev can go stale (manual git pull in the plugin
+            -- dir, reverted lockfile, etc.). Confirm against the on-disk
+            -- HEAD -- that's the code that actually runs -- before flagging.
+            vim.system({ "git", "rev-list", "-1", "HEAD" }, { text = true, cwd = p.path }, function(dres)
+              local disk_rev = dres.code == 0 and (dres.stdout:match("^(%x+)") or "") or ""
+              if disk_rev == "" or remote:sub(1, #disk_rev) ~= disk_rev then
+                names[#names + 1] = plugin_name(p)
+              end
+              finish_one()
+            end)
+            return
           end
         end
         finish_one()
